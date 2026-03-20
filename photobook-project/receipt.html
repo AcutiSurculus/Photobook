@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Receipt - Photobook Creator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="https://www.dmcbusaprinters.com/wp-content/uploads/2020/01/favicon.ico" sizes="32x32" />
+</head>
+<body style="background-color: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px 20px; overflow-y: auto;">
+
+    <div class="receipt-container" id="receipt-content" style="background-color: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 500px;">
+        
+        <div style="text-align: center; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
+            <h1 style="color: var(--brand-red); margin-bottom: 5px; font-size: 1.8rem;">DMC Busa Printers</h1>
+            <p style="color: var(--text-muted); font-weight: 500;">Official Photobook Order Receipt</p>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 5px;" id="receipt-date"></p>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h3 style="margin-bottom: 15px; color: var(--text-dark); font-size: 1.1rem;">Order Details:</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1rem; color: var(--text-dark);">
+                <span>Base Photobook (12 Pages)</span>
+                <span>₱500.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--text-muted); font-size: 0.95rem;">
+                <span>Extra Pages Added (<span id="extra-pages-count">0</span>)</span>
+                <span>₱<span id="extra-pages-cost">0.00</span></span>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; border-top: 2px solid var(--text-dark); padding-top: 15px; margin-bottom: 30px;">
+            <strong style="font-size: 1.2rem; color: var(--text-dark);">Total Amount Due:</strong>
+            <strong style="font-size: 1.3rem; color: var(--brand-red);">₱<span id="final-price">500.00</span></strong>
+        </div>
+
+        <div style="background-color: #fff3f3; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid var(--brand-red);">
+            <p style="font-size: 0.9rem; color: var(--text-dark); line-height: 1.5;">
+                <strong>Please Note:</strong> Present this receipt at our physical store to complete your payment and begin production of your photobook.
+            </p>
+        </div>
+
+        <div id="action-buttons" style="display: flex; gap: 15px; justify-content: center;">
+            <button id="download-pdf-btn" style="margin-bottom: 0;">📄 Save as PDF</button>
+            <button onclick="window.close()" style="background-color: var(--text-muted); margin-bottom: 0;">Close Window</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        // --- 1. Populate the Data from LocalStorage ---
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        document.getElementById('receipt-date').innerText = "Date: " + new Date().toLocaleDateString('en-PH', options);
+
+        const totalPages = parseInt(localStorage.getItem('receipt_total_pages')) || 12;
+        const totalPrice = parseFloat(localStorage.getItem('receipt_total_price')) || 500.00;
+
+        let extraPages = 0;
+        let extraCost = 0;
+        if (totalPages > 12) {
+            extraPages = totalPages - 12;
+            extraCost = extraPages * 50.00; 
+        }
+
+        document.getElementById('extra-pages-count').innerText = extraPages;
+        document.getElementById('extra-pages-cost').innerText = extraCost.toFixed(2);
+        document.getElementById('final-price').innerText = totalPrice.toFixed(2);
+
+        // --- 2. PDF Generation Logic ---
+        document.getElementById('download-pdf-btn').addEventListener('click', () => {
+            const receiptElement = document.getElementById('receipt-content');
+            const buttons = document.getElementById('action-buttons');
+            
+            // Save original display style
+            const btnOriginalDisplay = buttons.style.display;
+
+            // 1. Temporarily hide the buttons so they don't show up in the PDF
+            buttons.style.display = 'none';
+
+            // 2. Take a high-quality snapshot of the receipt HTML box
+            html2canvas(receiptElement, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+                
+                // Convert the snapshot into image data
+                const imgData = canvas.toDataURL('image/png');
+                
+                // Create a new PDF document matching the dimensions of the HTML box
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'px',
+                    format: [canvas.width / 2, canvas.height / 2] 
+                });
+
+                // Paste the image into the PDF and download it
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+                pdf.save('DMC_Photobook_Receipt.pdf');
+
+                // 3. Bring the buttons back to the screen
+                buttons.style.display = btnOriginalDisplay;
+            });
+        });
+    </script>
+</body>
+</html>

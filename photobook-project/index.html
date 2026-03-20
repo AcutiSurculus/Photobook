@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photobook Creator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="https://www.dmcbusaprinters.com/wp-content/uploads/2020/01/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="https://www.dmcbusaprinters.com/wp-content/uploads/2020/01/favicon.ico" sizes="192x192" />
+</head>
+<body>
+
+    <header class="top-bar">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <button id="toggle-sidebar-btn" style="padding: 10px 15px; margin-bottom: 0; width: auto;">☰ Tools</button>
+            <h1 style="margin: 0;">Photobook Creator</h1>
+            
+            <a href="feedback.html" style="color: var(--brand-red); font-weight: 600; text-decoration: none; font-size: 0.85rem; border: 1px solid var(--brand-red); padding: 5px 10px; border-radius: 4px; background: #fff0f0;">💬 Alpha Feedback</a>
+        </div>
+        
+        <div class="top-actions">
+            <span id="price-display">Total: ₱0.00</span>
+            
+            <button id="view-receipt-btn" style="background-color: var(--text-dark);">View Receipt</button>
+            
+            <button id="load-progress-btn" style="background-color: #555;">Load Progress</button>
+            <input type="file" id="load-project-upload" style="display: none;" accept=".json">
+            <button id="save-progress-btn">Save Progress</button>
+            <button id="generate-pdf-btn">Finish & Generate PDF</button>
+        </div>
+    </header>
+
+    <main class="workspace">
+        <div class="canvas-area" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+            
+            <div class="pagination-bar">
+                <button id="prev-page-btn" class="page-btn">◄ Prev Page</button>
+                <span id="page-indicator">Front Cover</span>
+                <button id="next-page-btn" class="page-btn">Next Page ►</button>
+            </div>
+
+            <section class="canvas-container">
+                <div id="zoom-wrapper">
+                    <canvas id="spread-canvas"></canvas>
+                </div>
+            </section>
+            
+        </div>
+
+        <aside class="sidebar">
+            <h2>Tools</h2>
+            
+            <div class="tool-section">
+                <h3>Workspace Zoom</h3>
+                <input type="range" id="zoom-slider" min="0.5" max="2" step="0.1" value="1" style="width: 100%;">
+                <p style="text-align: center; font-size: 0.8rem; margin-top: 5px;" id="zoom-val">100%</p>
+            </div>
+
+            <div class="tool-section">
+                <h3>Book Size (Inches)</h3>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="book-width" value="8" min="4" max="15" step="0.5" class="size-input">
+                    <span style="line-height: 35px;">x</span>
+                    <input type="number" id="book-height" value="11" min="4" max="15" step="0.5" class="size-input">
+                </div>
+                <button id="apply-size-btn">Apply Custom Size</button>
+                <button id="reset-size-btn" style="background-color: #555; margin-top: 5px;">Reset Default</button>
+            </div>
+
+            <div class="tool-section">
+                <h3>Add Text & Media</h3>
+                
+                <select id="font-family" class="size-input" style="margin-bottom: 10px; width: 100%; padding: 8px;">
+                    <optgroup label="Sans-Serif (Modern & Clean)">
+                        <option value="Poppins" selected>Poppins</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Lato">Lato</option>
+                        <option value="Oswald">Oswald</option>
+                        <option value="Raleway">Raleway</option>
+                        <option value="Inter">Inter</option>
+                        <option value="Nunito">Nunito</option>
+                        <option value="Quicksand">Quicksand</option>
+                    </optgroup>
+                    <optgroup label="Serif (Classic & Elegant)">
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Merriweather">Merriweather</option>
+                        <option value="Lora">Lora</option>
+                        <option value="PT Serif">PT Serif</option>
+                        <option value="Noto Serif">Noto Serif</option>
+                        <option value="Libre Baskerville">Libre Baskerville</option>
+                        <option value="EB Garamond">EB Garamond</option>
+                        <option value="Crimson Text">Crimson Text</option>
+                        <option value="Josefin Slab">Josefin Slab</option>
+                        <option value="Cormorant Garamond">Cormorant Garamond</option>
+                    </optgroup>
+                    <optgroup label="Script (Cursive & Fun)">
+                        <option value="Dancing Script">Dancing Script</option>
+                        <option value="Pacifico">Pacifico</option>
+                        <option value="Caveat">Caveat</option>
+                        <option value="Satisfy">Satisfy</option>
+                        <option value="Great Vibes">Great Vibes</option>
+                        <option value="Sacramento">Sacramento</option>
+                        <option value="Parisienne">Parisienne</option>
+                        <option value="Cookie">Cookie</option>
+                        <option value="Yellowtail">Yellowtail</option>
+                        <option value="Alex Brush">Alex Brush</option>
+                    </optgroup>
+                </select>
+
+                <button id="add-text-btn">+ Add Text Box</button>
+                <button id="add-image-btn" onclick="document.getElementById('image-upload').click()">+ Add Photo</button>
+                <input type="file" id="image-upload" style="display: none;" accept="image/png, image/jpeg">
+            </div>
+
+            <div class="tool-section" id="object-controls-section" style="display: none; background-color: #f9f9f9; padding: 15px; border-radius: 5px; border: 1px solid var(--border-color);">
+                <h3 style="color: var(--brand-red);">Edit Selected Item</h3>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button id="bring-forward-btn" style="padding: 10px; font-size: 0.8rem; background-color: #555;">↑ Move Up</button>
+                    <button id="send-backward-btn" style="padding: 10px; font-size: 0.8rem; background-color: #555;">↓ Move Down</button>
+                </div>
+                
+                <button id="delete-object-btn" style="background-color: var(--text-dark); margin-bottom: 0;">🗑️ Delete Item</button>
+            </div>
+
+            <div class="tool-section">
+                <h3>Pages</h3>
+                <p>Total Pages: <span id="total-pages">12</span></p>
+                <button id="add-page-btn">+ Add 2 Pages</button>
+                <button id="delete-page-btn" style="background-color: #aa0000;">- Delete Current Spread</button>
+            </div>
+            
+        </aside>
+    </main>
+
+    <div id="order-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: var(--surface-color); padding: 40px; border-radius: 8px; text-align: center; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: var(--brand-red); margin-bottom: 15px;">PDF Downloaded! 🎉</h2>
+            <p style="color: var(--text-dark); margin-bottom: 25px; line-height: 1.5;">
+                Your photobook has been saved to your computer. Would you like to send this design to <strong>DMC Busa Printers</strong> to get it professionally printed?
+            </p>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button id="send-to-printer-btn" style="margin-bottom: 0;">Yes, Send Order</button>
+                <button id="close-modal-btn" style="background-color: var(--text-muted); margin-bottom: 0;">No, Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>

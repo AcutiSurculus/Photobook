@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Feedback - Photobook Creator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="https://www.dmcbusaprinters.com/wp-content/uploads/2020/01/favicon.ico" sizes="32x32" />
+</head>
+<body>
+
+    <header class="top-bar">
+        <h1>Alpha Feedback</h1>
+        <div class="top-actions">
+            <button onclick="window.location.href='index.html'" style="background-color: var(--text-muted); margin-bottom: 0;">&larr; Back to Editor</button>
+        </div>
+    </header>
+
+    <main class="workspace" style="justify-content: center; align-items: center;">
+        
+        <div class="feedback-container">
+            <h2 style="color: var(--text-dark); margin-bottom: 5px;">Submit Your Feedback</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+                Found a bug? Have a suggestion? Let us know below!
+            </p>
+
+            <form action="php/process_feedback.php" method="POST">
+                
+                <div class="form-group">
+                    <label for="name">Name (Optional)</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="Juan Dela Cruz">
+                </div>
+
+                <div class="form-group">
+                    <label for="type">Feedback Type</label>
+                    <select id="type" name="type" class="form-input" required style="font-family: inherit;">
+                        <option value="Bug Report">Bug Report (Something is broken)</option>
+                        <option value="Feature Request">Feature Request (I want a new tool)</option>
+                        <option value="Mobile Layout">Design/Usability (It's hard to use)</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" class="form-input" rows="6" placeholder="Please describe the issue or suggestion in detail..." required></textarea>
+                </div>
+
+                <button type="submit" style="width: 100%; font-size: 1.1rem; padding: 12px; margin-bottom: 0;">Submit Feedback</button>
+            </form>
+        </div>
+
+    </main>
+
+</body>
+</html>

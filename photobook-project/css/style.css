@@ -1,0 +1,311 @@
+/* --- 1. CSS Variables & Reset --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Alex+Brush&family=Caveat&family=Cookie&family=Cormorant+Garamond&family=Crimson+Text&family=Dancing+Script&family=EB+Garamond&family=Great+Vibes&family=Inter&family=Josefin+Slab&family=Lato&family=Libre+Baskerville&family=Lora&family=Merriweather&family=Montserrat&family=Noto+Serif&family=Nunito&family=Open+Sans&family=Oswald&family=Pacifico&family=Parisienne&family=Playfair+Display&family=PT+Serif&family=Quicksand&family=Raleway&family=Sacramento&family=Satisfy&family=Yellowtail&display=swap');
+
+:root {
+    --bg-color: #E2E8F0;       
+    --surface-color: #FFFFFF;  
+    --text-dark: #3a3a3a;      
+    --text-muted: #4B4F58;     
+    --border-color: #E5E5E5;   
+    --btn-bg: #ff5151;         
+    --btn-hover: #ff3f26;      
+    --btn-text: #ffffff;
+    --brand-red: #de222a;      
+    --accent-blue: #00aef0;    
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-dark);
+    background-color: var(--surface-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- 2. Top Navigation Bar --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--surface-color);
+    border-bottom: 3px solid var(--brand-red); 
+    z-index: 10;
+}
+
+.top-bar h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--brand-red); 
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+#price-display {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--brand-red); 
+}
+
+/* --- 3. Buttons & Inputs --- */
+button {
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    border: none;
+    padding: 13px 40px; 
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-transform: uppercase; 
+    cursor: pointer;
+    border-radius: 5px; 
+    transition: background-color 0.2s ease, color 0.2s ease;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+button:hover { background-color: var(--btn-hover); }
+
+.top-actions button {
+    width: auto; 
+    padding: 10px 20px; 
+}
+
+a { transition: color 0.2s ease; }
+a:hover { color: var(--accent-blue) !important; }
+
+/* FIXED: Missing styling for the input boxes and font dropdown */
+.size-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+/* --- 4. Main Workspace Layout --- */
+.workspace {
+    display: flex;
+    flex: 1; 
+    height: calc(100vh - 70px); 
+    background-color: var(--bg-color); /* Moved background here to fill space smoothly */
+}
+
+/* FIXED: The new wrapper for the Canvas and Pagination */
+.canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    order: 2;
+}
+
+/* --- 5. Pagination Bar --- */
+.pagination-bar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 20px;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    width: 100%;
+    z-index: 5;
+    border-bottom: 3px solid var(--brand-red); 
+}
+
+.page-btn {
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    background-color: var(--text-muted); 
+    width: auto;
+    margin-bottom: 0;
+    border-radius: 20px; 
+}
+
+.page-btn:hover { background-color: var(--text-dark); }
+
+#page-indicator {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    min-width: 120px;
+    text-align: center;
+}
+
+/* --- 6. The Canvas Container & Zoom --- */
+.canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+    padding: 40px;
+    overflow: auto; 
+}
+
+#zoom-wrapper {
+    transition: transform 0.2s ease;
+    transform-origin: center top; 
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25); 
+    background-color: #ffffff;
+    border-radius: 2px;
+    margin: 20px auto; 
+}
+
+/* --- 7. Sidebar Tools --- */
+.sidebar {
+    width: 320px;
+    background-color: var(--surface-color);
+    border-right: 3px solid var(--brand-red); 
+    border-left: 3px solid var(--brand-red); 
+    border-bottom: 3px solid var(--brand-red); 
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    overflow-y: auto;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    order: 1;
+}
+
+/* FIXED: The White Box Glitch. Forces width, padding, and borders to absolute zero. */
+.sidebar.collapsed {
+    width: 0 !important; 
+    max-width: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important; 
+    border: none !important;
+    opacity: 0;
+    overflow: hidden;
+    margin: 0 !important;
+}
+
+.sidebar h2 {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--text-dark);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.tool-section h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.tool-section p {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+}
+
+/* --- 8. Mobile Responsiveness --- */
+@media (max-width: 768px) {
+    .workspace {
+        flex-direction: column; 
+        height: auto;
+        overflow-y: auto; 
+    }
+
+    .canvas-area {
+        order: 1; 
+    }
+
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+        border-right: none;
+        border-top: 3px solid var(--brand-red); 
+        border-bottom: 3px solid var(--brand-red); 
+        padding: 15px;
+        order: 2;
+    }
+
+    /* FIXED: Highly compressed Mobile Navigation to save screen space */
+    .top-bar {
+        flex-direction: column;
+        gap: 5px; 
+        padding: 8px; 
+        text-align: center;
+    }
+
+    .top-bar h1 { font-size: 1.05rem; }
+
+    .top-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px; 
+    }
+
+    .top-actions button {
+        padding: 5px 8px;
+        font-size: 0.7rem; 
+        margin-bottom: 0;
+    }
+
+    #price-display {
+        font-size: 0.9rem;
+        width: 100%; 
+        margin-bottom: 3px;
+    }
+
+    /* FIXED: Better mobile canvas margins */
+    .canvas-container {
+        padding: 20px 10px; 
+        min-height: 50vh; 
+        align-items: flex-start; 
+    }
+}
+
+/* --- 9. Feedback Form Styling --- */
+.feedback-container {
+    background-color: var(--surface-color);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px; 
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.form-input {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text-dark);
+    resize: vertical; 
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--brand-red); /* Added a nice brand-red highlight when typing! */
+}
