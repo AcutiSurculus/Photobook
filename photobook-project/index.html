@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photobook Creator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Photobook Creator - DMC Busa</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=3">
     <link rel="icon" href="https://www.dmcbusaprinters.com/wp-content/uploads/2020/01/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="https://www.dmcbusaprinters.com/wp-content/uploads/2020/01/favicon.ico" sizes="192x192" />
 </head>
 <body>
 
@@ -15,15 +14,12 @@
         <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
             <button id="toggle-sidebar-btn" style="padding: 10px 15px; margin-bottom: 0; width: auto;">☰ Tools</button>
             <h1 style="margin: 0;">Photobook Creator</h1>
-            
             <a href="feedback.html" style="color: var(--brand-red); font-weight: 600; text-decoration: none; font-size: 0.85rem; border: 1px solid var(--brand-red); padding: 5px 10px; border-radius: 4px; background: #fff0f0;">💬 Alpha Feedback</a>
         </div>
         
         <div class="top-actions">
             <span id="price-display">Total: ₱0.00</span>
-            
             <button id="view-receipt-btn" style="background-color: var(--text-dark);">View Receipt</button>
-            
             <button id="load-progress-btn" style="background-color: #555;">Load Progress</button>
             <input type="file" id="load-project-upload" style="display: none;" accept=".json">
             <button id="save-progress-btn">Save Progress</button>
@@ -32,8 +28,8 @@
     </header>
 
     <main class="workspace">
-        <div class="canvas-area" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-            
+        
+        <div class="canvas-area">
             <div class="pagination-bar">
                 <button id="prev-page-btn" class="page-btn">◄ Prev Page</button>
                 <span id="page-indicator">Front Cover</span>
@@ -45,16 +41,24 @@
                     <canvas id="spread-canvas"></canvas>
                 </div>
             </section>
-            
         </div>
 
         <aside class="sidebar">
-            <h2>Tools</h2>
+            <div class="mobile-drawer-handle"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="margin: 0; border: none; padding: 0; color: var(--text-muted); text-transform: uppercase;">Tools</h2>
+                <button id="close-drawer-btn" class="mobile-only-btn" style="background: none; color: var(--brand-red); font-size: 1.5rem; padding: 0; width: auto; margin: 0;">&times;</button>
+            </div>
             
             <div class="tool-section">
                 <h3>Workspace Zoom</h3>
-                <input type="range" id="zoom-slider" min="0.5" max="2" step="0.1" value="1" style="width: 100%;">
-                <p style="text-align: center; font-size: 0.8rem; margin-top: 5px;" id="zoom-val">100%</p>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button id="zoom-out-btn" style="width: 40px; padding: 5px; font-size: 1.2rem; background: var(--text-muted); margin:0;">-</button>
+                    <input type="range" id="zoom-slider" min="0.2" max="2" step="0.1" value="1" style="flex: 1;">
+                    <button id="zoom-in-btn" style="width: 40px; padding: 5px; font-size: 1.2rem; background: var(--text-muted); margin:0;">+</button>
+                </div>
+                <p style="text-align: center; font-size: 0.8rem; margin-top: 8px;" id="zoom-val">100%</p>
             </div>
 
             <div class="tool-section">
@@ -70,7 +74,6 @@
 
             <div class="tool-section">
                 <h3>Add Text & Media</h3>
-                
                 <select id="font-family" class="size-input" style="margin-bottom: 10px; width: 100%; padding: 8px;">
                     <optgroup label="Sans-Serif (Modern & Clean)">
                         <option value="Poppins" selected>Poppins</option>
@@ -132,7 +135,6 @@
                 <button id="add-page-btn">+ Add 2 Pages</button>
                 <button id="delete-page-btn" style="background-color: #aa0000;">- Delete Current Spread</button>
             </div>
-            
         </aside>
     </main>
 
@@ -151,6 +153,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    <script src="js/editor.js"></script>
+    <script src="js/editor.js?v=3"></script>
 </body>
 </html>

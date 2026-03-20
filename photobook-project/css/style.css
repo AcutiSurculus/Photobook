@@ -38,7 +38,11 @@ body {
     padding: 15px 30px;
     background-color: var(--surface-color);
     border-bottom: 3px solid var(--brand-red); 
-    z-index: 10;
+    
+    /* NEW: Sticky Positioning */
+    position: sticky;
+    top: 0;
+    z-index: 9000; /* Keeps it above the canvas and images */
 }
 
 .top-bar h1 {
@@ -214,34 +218,76 @@ a:hover { color: var(--accent-blue) !important; }
     color: var(--text-muted);
 }
 
-/* --- 8. Mobile Responsiveness --- */
+/* --- 8. Mobile Responsiveness & Bottom Sheet UI --- */
 @media (max-width: 768px) {
     .workspace {
         flex-direction: column; 
         height: auto;
-        overflow-y: auto; 
+        /* Give the canvas enough room to scroll without getting hidden by the top bar */
+        height: calc(100vh - 80px); 
     }
 
     .canvas-area {
         order: 1; 
+        overflow: auto; /* Allows smooth panning */
     }
 
+    /* --- THE CANVA-STYLE BOTTOM DRAWER --- */
     .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
         width: 100%;
         max-width: 100%;
-        border-right: none;
-        border-top: 3px solid var(--brand-red); 
-        border-bottom: 3px solid var(--brand-red); 
-        padding: 15px;
+        max-height: 65vh; /* Covers the bottom 65% of the screen */
+        background: var(--surface-color);
+        border: none;
+        border-radius: 20px 20px 0 0; /* Beautiful rounded top corners */
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+        z-index: 1000;
+        padding: 15px 20px 30px 20px;
         order: 2;
+        /* Animation Magic */
+        transform: translateY(120%); 
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* FIXED: Highly compressed Mobile Navigation to save screen space */
+    /* When the drawer is open... */
+    .sidebar.mobile-open {
+        transform: translateY(0);
+        /* Force it to stay visible and ignore the desktop .collapsed rules */
+        width: 100% !important;
+        max-width: 100% !important;
+        max-height: 65vh !important;
+        padding: 15px 20px 30px 20px !important;
+        opacity: 1 !important;
+    }
+
+    /* The little pill-shape handle at the top of mobile drawers */
+    .mobile-drawer-handle {
+        width: 40px;
+        height: 5px;
+        background-color: var(--border-color);
+        border-radius: 10px;
+        margin: 0 auto 15px auto;
+        display: block;
+    }
+
+    .mobile-only-btn {
+        display: block !important;
+    }
+
+ /* Compress the Top Navigation */
     .top-bar {
         flex-direction: column;
         gap: 5px; 
         padding: 8px; 
         text-align: center;
+        
+        /* CHANGED: Ensure it stays sticky on mobile too! */
+        position: sticky;
+        top: 0;
+        z-index: 9000; 
     }
 
     .top-bar h1 { font-size: 1.05rem; }
@@ -264,13 +310,20 @@ a:hover { color: var(--accent-blue) !important; }
         margin-bottom: 3px;
     }
 
-    /* FIXED: Better mobile canvas margins */
     .canvas-container {
-        padding: 20px 10px; 
+        padding: 10px 10px 80px 10px; /* Extra bottom padding so it doesn't get cut off */
         min-height: 50vh; 
         align-items: flex-start; 
     }
 }
+
+/* Hide mobile-specific elements on Desktop */
+@media (min-width: 769px) {
+    .mobile-drawer-handle, .mobile-only-btn {
+        display: none !important;
+    }
+}
+
 
 /* --- 9. Feedback Form Styling --- */
 .feedback-container {

@@ -7,6 +7,20 @@ let pageHeightPx = 11 * PPI;
 // --- 1. Initialize ONE Canvas ---
 const canvas = new fabric.Canvas('spread-canvas', { backgroundColor: '#ffffff' });
 
+// --- UPGRADED: Mobile-Friendly Selection Handles ---
+fabric.Object.prototype.set({
+    transparentCorners: false,
+    cornerColor: '#de222a',       
+    cornerStrokeColor: '#ffffff', 
+    borderColor: '#de222a',       
+    cornerSize: 20,               
+    touchCornerSize: 34,          // Massive hit-area for thumbs!
+    padding: 8,                   
+    cornerStyle: 'circle',        
+    borderScaleFactor: 2,         
+    rotatingPointOffset: 35       
+});
+
 // --- 2. Project Variables ---
 let totalPages = 12; 
 let currentSpread = 0; 
@@ -16,7 +30,7 @@ let spreadsData = new Array(maxSpreads + 1).fill(null);
 const basePrice = 500.00; 
 const pricePerExtraPage = 50.00; 
 
-// --- 3. View Logic (The "InDesign" Single Spread Setup) ---
+// --- 3. View Logic ---
 function updateSpreadView() {
     maxSpreads = Math.ceil(totalPages / 2);
     const indicator = document.getElementById('page-indicator');
@@ -54,9 +68,14 @@ canvas.on('after:render', function() {
         ctx.beginPath();
         ctx.moveTo(pageWidthPx, 0); 
         ctx.lineTo(pageWidthPx, pageHeightPx); 
-        ctx.strokeStyle = '#cccccc'; 
-        ctx.lineWidth = 2;
+        
+        // UPGRADED: Highly visible dashed spine line
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)'; 
+        ctx.lineWidth = 3;                       
+        ctx.setLineDash([15, 10]);               
+        
         ctx.stroke();
+        ctx.setLineDash([]); 
     }
 });
 
@@ -74,22 +93,16 @@ function loadCurrentSpread() {
     updateSpreadView();
 }
 
-// --- 6. Navigation Buttons (FIXED: Removed Duplicates) ---
+// --- 6. Navigation Buttons ---
 document.getElementById('prev-page-btn').addEventListener('click', () => {
     if (currentSpread > 0) {
-        saveCurrentSpread(); 
-        currentSpread--;     
-        loadCurrentSpread(); 
-        smartAutoZoom(); // Ensure zoom stays perfect when flipping pages
+        saveCurrentSpread(); currentSpread--; loadCurrentSpread(); smartAutoZoom(); 
     }
 });
 
 document.getElementById('next-page-btn').addEventListener('click', () => {
     if (currentSpread < maxSpreads) {
-        saveCurrentSpread(); 
-        currentSpread++;     
-        loadCurrentSpread(); 
-        smartAutoZoom(); // Ensure zoom stays perfect when flipping pages
+        saveCurrentSpread(); currentSpread++; loadCurrentSpread(); smartAutoZoom(); 
     }
 });
 
@@ -116,7 +129,7 @@ document.getElementById('delete-page-btn').addEventListener('click', () => {
     }
 });
 
-// --- 7. Workspace Zoom Slider & Mobile Auto-Zoom (FIXED) ---
+// --- 7. Workspace Zoom Slider & Mobile Auto-Zoom ---
 const zoomSlider = document.getElementById('zoom-slider');
 const zoomValText = document.getElementById('zoom-val');
 const zoomWrapper = document.getElementById('zoom-wrapper');
@@ -130,11 +143,25 @@ zoomSlider.addEventListener('input', (e) => {
     applyZoom(e.target.value);
 });
 
-// NEW: Packaged the math into a reusable function
+document.getElementById('zoom-in-btn').addEventListener('click', () => {
+    let currentZoom = parseFloat(zoomSlider.value);
+    if (currentZoom < 2) {
+        zoomSlider.value = (currentZoom + 0.1).toFixed(1);
+        applyZoom(zoomSlider.value);
+    }
+});
+
+document.getElementById('zoom-out-btn').addEventListener('click', () => {
+    let currentZoom = parseFloat(zoomSlider.value);
+    if (currentZoom > 0.2) {
+        zoomSlider.value = (currentZoom - 0.1).toFixed(1);
+        applyZoom(zoomSlider.value);
+    }
+});
+
 function smartAutoZoom() {
     if (window.innerWidth <= 768) {
         let currentCanvasWidth = pageWidthPx * (currentSpread === 0 || currentSpread === maxSpreads ? 1 : 2);
-        // FIXED: Increased subtraction to 100 to guarantee comfortable side margins
         let perfectZoom = (window.innerWidth - 100) / currentCanvasWidth;
         let finalZoom = perfectZoom < 0.2 ? 0.2 : perfectZoom; 
         zoomSlider.value = finalZoom;
@@ -142,13 +169,79 @@ function smartAutoZoom() {
     }
 }
 
+// --- NEW: Multi-Touch Gestures (Pinch to Zoom & Pan) ---
+const canvasContainer = document.querySelector('.canvas-container');
+let initialPinchDistance = null;
+let initialZoomBeforePinch = 1;
+let lastPanX = null;
+let lastPanY = null;
+
+canvasContainer.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+        // Calculate the distance between the two fingers
+        initialPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialZoomBeforePinch = parseFloat(zoomSlider.value);
+        
+        // Track center point for panning
+        lastPanX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        lastPanY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    }
+}, { passive: false });
+
+canvasContainer.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && initialPinchDistance) {
+        e.preventDefault(); // Stop the screen from bouncing around
+        
+        // 1. PINCH TO ZOOM LOGIC
+        const currentDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        const zoomDelta = currentDistance / initialPinchDistance;
+        let newZoom = initialZoomBeforePinch * zoomDelta;
+
+        // Keep zoom within the slider's limits (0.2x to 2x)
+        if (newZoom < 0.2) newZoom = 0.2;
+        if (newZoom > 2) newZoom = 2;
+
+        zoomSlider.value = newZoom.toFixed(2);
+        applyZoom(newZoom);
+
+        // 2. TWO-FINGER PANNING LOGIC
+        const currentCenterX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const currentCenterY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+        if (lastPanX !== null && lastPanY !== null) {
+            const deltaX = lastPanX - currentCenterX;
+            const deltaY = lastPanY - currentCenterY;
+            
+            // Move the scroll container smoothly to follow the fingers
+            canvasContainer.scrollBy(deltaX, deltaY);
+        }
+
+        lastPanX = currentCenterX;
+        lastPanY = currentCenterY;
+    }
+}, { passive: false });
+
+canvasContainer.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+        initialPinchDistance = null;
+        lastPanX = null;
+        lastPanY = null;
+    }
+});
+
 // --- 8. Custom Sizing & Reset Logic ---
 function resizeCanvases(wPx, hPx) {
     pageWidthPx = wPx;
     pageHeightPx = hPx;
     updateSpreadView(); 
     canvas.renderAll();
-    smartAutoZoom(); // Recalculate zoom when sizes change!
+    smartAutoZoom(); 
 }
 
 document.getElementById('apply-size-btn').addEventListener('click', () => {
@@ -163,7 +256,17 @@ document.getElementById('reset-size-btn').addEventListener('click', () => {
     resizeCanvases(8 * PPI, 11 * PPI);
 });
 
-// --- 9. Add Text & Media (Perfect Boundaries & Centering) ---
+// --- Helper function to collapse the toolbar ---
+function closeToolbar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove('mobile-open');
+    } else {
+        sidebar.classList.add('collapsed');
+    }
+}
+
+// --- 9. Add Text & Media ---
 document.getElementById('image-upload').addEventListener('change', function(e) {
     if (currentSpread === 0 || currentSpread === maxSpreads) {
         return alert("Custom photos are not allowed on the Covers.");
@@ -178,6 +281,8 @@ document.getElementById('image-upload').addEventListener('change', function(e) {
             canvas.add(img); 
             canvas.setActiveObject(img);
             canvas.renderAll(); 
+            
+            closeToolbar(); // Auto-hide toolbar so they can see the photo!
         });
     };
     if (file) reader.readAsDataURL(file);
@@ -210,6 +315,8 @@ document.getElementById('add-text-btn').addEventListener('click', () => {
     canvas.centerObject(text);
     canvas.add(text); 
     canvas.setActiveObject(text);
+    
+    closeToolbar(); // Auto-hide toolbar so they can see the text!
 });
 
 document.getElementById('font-family').addEventListener('change', function(e) {
@@ -275,8 +382,7 @@ document.getElementById('load-project-upload').addEventListener('change', functi
             maxSpreads = Math.ceil(totalPages / 2);
 
             loadCurrentSpread();
-            smartAutoZoom(); // Recalculate zoom for the newly loaded canvas!
-
+            smartAutoZoom(); 
             alert("Project loaded successfully!");
         } catch (error) {
             alert("Oops! This doesn't look like a valid photobook save file.");
@@ -346,7 +452,7 @@ document.getElementById('generate-pdf-btn').addEventListener('click', async () =
     }
 
     loadCurrentSpread(); 
-    smartAutoZoom(); // Make sure it zooms back properly after compiling!
+    smartAutoZoom(); 
 
     pendingPdfBlob = pdf.output('blob');
     pdf.save('My_DMC_Photobook.pdf');
@@ -379,14 +485,35 @@ document.getElementById('send-to-printer-btn').addEventListener('click', async (
 // --- 13. Sidebar Toggle & Object Controls ---
 document.getElementById('toggle-sidebar-btn').addEventListener('click', () => {
     const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('collapsed');
+    
+    if (window.innerWidth <= 768) {
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.toggle('mobile-open');
+    } else {
+        sidebar.classList.remove('mobile-open');
+        sidebar.classList.toggle('collapsed');
+    }
+});
+
+document.getElementById('close-drawer-btn').addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('mobile-open');
 });
 
 const objectControlsPanel = document.getElementById('object-controls-section');
 
-canvas.on('selection:created', () => { objectControlsPanel.style.display = 'block'; });
-canvas.on('selection:updated', () => { objectControlsPanel.style.display = 'block'; });
-canvas.on('selection:cleared', () => { objectControlsPanel.style.display = 'none'; });
+canvas.on('selection:created', () => { 
+    objectControlsPanel.style.display = 'block'; 
+    if (window.innerWidth <= 768) document.querySelector('.sidebar').classList.add('mobile-open');
+});
+
+canvas.on('selection:updated', () => { 
+    objectControlsPanel.style.display = 'block'; 
+    if (window.innerWidth <= 768) document.querySelector('.sidebar').classList.add('mobile-open');
+});
+
+canvas.on('selection:cleared', () => { 
+    objectControlsPanel.style.display = 'none'; 
+});
 
 document.getElementById('bring-forward-btn').addEventListener('click', () => {
     const activeObj = canvas.getActiveObject();
@@ -424,5 +551,5 @@ document.getElementById('view-receipt-btn').addEventListener('click', () => {
 });
 
 // --- STARTUP LOGIC ---
-updateSpreadView(); // Set the initial page math
-smartAutoZoom();    // Set the initial zoom
+updateSpreadView(); 
+smartAutoZoom();
